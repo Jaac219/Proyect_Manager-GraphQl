@@ -7,11 +7,7 @@ const app = express();
 
 const PORT = process.env.PORT;
 
-const typeDefs = [`
-  type Query {
-    hello: String
-  }
-`]
+const typeDefs = require('./schemas/product.js');
 const resolvers = {
   Query: {
     hello: () => 'Hello'
