@@ -1,18 +1,16 @@
-  require("dotenv").config();
+require("dotenv").config();
+require("./src/db.js")
+
 const express = require("express");
 
-const { makeExecutableSchema } = require('@graphql-tools/schema');
-const { ApolloServer } = require('apollo-server-express')
+const { makeExecutableSchema } = require("@graphql-tools/schema");
+const { ApolloServer } = require("apollo-server-express")
 const app = express();
 
 const PORT = process.env.PORT;
 
-const typeDefs = require('./schemas/product.js');
-const resolvers = {
-  Query: {
-    hello: () => 'Hello'
-  }
-}
+const typeDefs = require("./src/merge/mergeSchemas.js");
+const resolvers = require("./src/merge/mergeResolvers.js");
 
 app.get('/', (req, res) =>{
   res.redirect(`http://localhost:${PORT}/graphql`);
@@ -20,7 +18,7 @@ app.get('/', (req, res) =>{
 
 async function start() {
   const schema = makeExecutableSchema({typeDefs, resolvers})
-  const apolloServer = new ApolloServer({schema});
+  const apolloServer = new ApolloServer({schema, context: {}});
   await apolloServer.start();
 
   apolloServer.applyMiddleware({app})
