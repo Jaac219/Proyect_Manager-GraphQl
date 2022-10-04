@@ -7,7 +7,7 @@ const productSchema = [`
     image: String
     price: Float!
     onSale: Boolean!
-    categoryId: String!
+    categoryId: String
     category: Category
     reviews: [Review!]!
     isRemove: Boolean
@@ -21,7 +21,7 @@ const productSchema = [`
   type Mutation {
     Save_Product(productInput: Product_Input): ID
     Delete_Product(_id: String!): Boolean
-    Update_Quantity(_id: String!, option: Option_Quantity!, value: Int!): ID
+    Update_Quantity(_id: String!, option: Option_Quantity!, value: Int!): Boolean
   }
 
   input Product_Filter {
@@ -44,8 +44,8 @@ const productSchema = [`
   }
 
   enum Option_Quantity {
-    ADD
-    SUBTRACT
+    INC
+    DEC
   }
 `];
 

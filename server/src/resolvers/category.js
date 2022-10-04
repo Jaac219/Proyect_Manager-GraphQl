@@ -1,9 +1,10 @@
-const category = require("../models/category.js");
-const product = require("../models/product.js");
+// const category = require("../models/category.js");
+// const product = require("../models/product.js");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
+const { default: mongoose } = require("mongoose");
 
-const Get_Categories = async (_, {filter = {}, option = {}}) => {
+const Get_Categories = async (_, {filter = {}, option = {}}, { category }) => {
   try {
     let { skip, limit } = handlePagination(option);
     let { name } = filter;
@@ -22,7 +23,7 @@ const Get_Categories = async (_, {filter = {}, option = {}}) => {
   }
 }
 
-const Get_Category = async (_, { id }) => {
+const Get_Category = async (_, { id }, { category }) => {
   try {
     return await category.findById(id);
   } catch (error) {
@@ -30,27 +31,27 @@ const Get_Category = async (_, { id }) => {
   }
 }
 
-const Save_Category = async (_, { categoryInput }) => {
+const Save_Category = async (_, { categoryInput }, { category }) => {
   try {
-    if(categoryInput._id) return await Update_Category(_, { categoryInput });
-    return await Create_Category(_, { categoryInput });
+    console.log(categoryInput)
+    if(categoryInput._id) return await Update_Category(_, { categoryInput }, { category });
+    return await Create_Category(_, { categoryInput }, { category });
   } catch (error) {
     return error;
   }
 }
 
-const Create_Category = async (_, { categoryInput }) => {
+const Create_Category = async (_, { categoryInput }, { category }) => {
   try {
     const _id = generateId();
     await category({ _id, ...categoryInput }).save();
-    console.log('si')
     return _id;
   } catch (error) {
     return error;
   }
 }
 
-const Update_Category = async (_, { categoryInput }) => {
+const Update_Category = async (_, { categoryInput }, { category }) => {
   try {
     await category.findByIdAndUpdate(categoryInput._id, { $set: categoryInput }, { new: true });
     return categoryInput._id;
@@ -59,12 +60,19 @@ const Update_Category = async (_, { categoryInput }) => {
   }
 }
 
-const Delete_Category = async (_, { _id }) => {
+const Delete_Category = async (_, { _id }, { category, product }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     await category.findByIdAndUpdate(_id, { $set: { isRemove: true } });
-    return true;
+    await product.updateMany({categoryId: _id}, {$set: {categoryId: null}});
+    await session.commitTransaction();
   } catch (error) {
+    await session.abortTransaction();
     return error;
+  } finally {
+    session.endSession();
+    return true;
   }
 }
 
@@ -78,8 +86,8 @@ module.exports = {
     Delete_Category
   },
   Category: {
-    products: async (parent, args) =>{
-      return await product.find({categoryId: parent._id});
+    products: async (parent, args, { product }) =>{
+      return await product.find({categoryId: parent._id, isRemove: false});
     }
   }
 }

@@ -6,8 +6,20 @@ const express = require("express");
 const { makeExecutableSchema } = require("@graphql-tools/schema");
 const { ApolloServer } = require("apollo-server-express")
 const app = express();
-
 const PORT = process.env.PORT;
+
+// ---------------------------------------------------
+// | / | Se requieren todos los modelos una sola     |
+// ||  | vez y se dejan disponibles a traves del     |
+// | \ | context de ApolloServer                     |
+// ---------------------------------------------------
+
+const product = require("./src/models/product.js");
+const category = require("./src/models/category.js");
+const review = require("./src/models/review.js");
+const context = { product, category, review };
+
+// ---------------------------------------------------
 
 const typeDefs = require("./src/merge/mergeSchemas.js");
 const resolvers = require("./src/merge/mergeResolvers.js");
@@ -18,7 +30,7 @@ app.get('/', (req, res) =>{
 
 async function start() {
   const schema = makeExecutableSchema({typeDefs, resolvers})
-  const apolloServer = new ApolloServer({schema, context: {}});
+  const apolloServer = new ApolloServer({schema, context });
   await apolloServer.start();
 
   apolloServer.applyMiddleware({app})
