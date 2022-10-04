@@ -1,9 +1,8 @@
-// const review = require("../models/review.js");
-// const product = require("../models/product.js");
+const { review, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
-const Get_Reviews = async (_, { filter = {}, option = {} }, { review }) => {
+const Reviews_Get = async (_, { filter = {}, option = {} }) => {
   try {
     let { skip, limit } = handlePagination(option);
     let { date, title, comment, rating } = filter;
@@ -24,7 +23,7 @@ const Get_Reviews = async (_, { filter = {}, option = {} }, { review }) => {
   }
 }
 
-const Get_Review = async (_, { id }, { review }) => {
+const Review_Get = async (_, { id }) => {
   try {
     return await review.findById(id);
   } catch (error) {
@@ -32,16 +31,16 @@ const Get_Review = async (_, { id }, { review }) => {
   }
 }
 
-const Save_Review = async (_, { reviewInput }, { review }) => {
+const Review_Save = async (_, { reviewInput }) => {
   try {
-    if(reviewInput._id) return await Update_Review(_, { reviewInput }, { review })
-    return await Create_Review(_, { reviewInput }, { review })
+    if(reviewInput._id) return await Review_Update(_, { reviewInput })
+    return await Review_Create(_, { reviewInput })
   } catch (error) {
     return error;
   }
 }
 
-const Create_Review = async (_, { reviewInput }, { review }) => {
+const Review_Create = async (_, { reviewInput }) => {
   try {
     const _id = generateId();
     await new review({ _id, ...reviewInput }).save();
@@ -51,7 +50,7 @@ const Create_Review = async (_, { reviewInput }, { review }) => {
   }
 }
 
-const Update_Review = async (_, { reviewInput }, { review }) => {
+const Review_Update = async (_, { reviewInput }) => {
   try {
     await review.findByIdAndUpdate(reviewInput._id, { $set: reviewInput }, {new: true});
     return reviewInput._id;
@@ -60,7 +59,7 @@ const Update_Review = async (_, { reviewInput }, { review }) => {
   }
 }
 
-const Delete_Review = async (_, { _id }, { review }) => {
+const Review_Delete = async (_, { _id }) => {
   try {
     await review.findByIdAndUpdate(_id, {$set: {isRemove: true}});
     return true;
@@ -69,18 +68,17 @@ const Delete_Review = async (_, { _id }, { review }) => {
   }
 }
 
-
 module.exports = {
   Query: {
-    Get_Reviews,
-    Get_Review
+    Reviews_Get,
+    Review_Get
   },
   Mutation: {
-    Save_Review,
-    Delete_Review
+    Review_Save,
+    Review_Delete
   },
   Review:{
-    product:  async (parent, args, { product }) => {
+    product:  async (parent, args) => {
       return await product.findById(parent.productId);
     }
   }

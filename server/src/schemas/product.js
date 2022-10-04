@@ -14,13 +14,13 @@ const productSchema = [`
   }
 
   type Query {
-    Get_Products(filter: Product_Filter, option: Option): [Product!]!
-    Get_Product(id: String!): Product
+    Products_Get(filter: Product_Filter, option: Option): [Product!]!
+    Product_Get(id: String!): Product
   }
 
   type Mutation {
-    Save_Product(productInput: Product_Input): ID
-    Delete_Product(_id: String!): Boolean
+    Product_Save(productInput: Product_Input): ID
+    Product_Delete(_id: String!): Boolean
     Update_Quantity(_id: String!, option: Option_Quantity!, value: Int!): Boolean
   }
 

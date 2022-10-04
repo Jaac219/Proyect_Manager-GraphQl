@@ -11,13 +11,13 @@ const reviewSchema = [`
   }
 
   type Query {
-    Get_Reviews(filter: Review_Filter, option: Option): [Review!]!
-    Get_Review(id: String!): Review
+    Reviews_Get(filter: Review_Filter, option: Option): [Review!]!
+    Review_Get(id: String!): Review
   }
 
   type Mutation {
-    Save_Review(reviewInput: Review_Input): ID
-    Delete_Review(_id: String!): Boolean
+    Review_Save(reviewInput: Review_Input): ID
+    Review_Delete(_id: String!): Boolean
   }
 
   input Review_Filter {

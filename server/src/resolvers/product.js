@@ -1,11 +1,9 @@
-// const product = require("../models/product.js");
-// const category = require("../models/category.js");
-// const review = require("../models/review.js");
+const { product, review, category } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 const { default: mongoose } = require("mongoose");
 
-const Get_Products = async(_, {filter = {}, option = {}}, { product }) =>{
+const Products_Get = async(_, {filter = {}, option = {}}) =>{
   try {
     let { skip, limit } = handlePagination(option);
     let { name, description } = filter;
@@ -25,7 +23,7 @@ const Get_Products = async(_, {filter = {}, option = {}}, { product }) =>{
   }
 }
 
-const Get_Product = async(_, { id }, { product }) =>{
+const Product_Get = async(_, { id }) =>{
   try {
     return await product.findById(id);
   } catch (error) {
@@ -33,16 +31,16 @@ const Get_Product = async(_, { id }, { product }) =>{
   }
 }
 
-const Save_Product = async(_,  { productInput }, { product }) => {
+const Product_Save = async(_,  { productInput }) => {
   try {
-    if(productInput._id) return await Update_Product(_, { productInput }, { product });
-    return await Create_Product(_, { productInput }, { product });
+    if(productInput._id) return await Product_Update(_, { productInput });
+    return await Product_Create(_, { productInput });
   } catch (error) {
     return error;
   }
 }
 
-const Create_Product = async(_, {productInput}, { product }) => {
+const Product_Create = async(_, {productInput}) => {
   try {
     const _id = generateId();
     await new product({ _id, ...productInput }).save();
@@ -52,7 +50,7 @@ const Create_Product = async(_, {productInput}, { product }) => {
   }
 }
 
-const Update_Product = async(_, {productInput}, { product }) => {
+const Product_Update = async(_, {productInput}) => {
   try {
     await product.findByIdAndUpdate(productInput._id, {$set: productInput}, { new: true });
     return productInput._id;
@@ -61,7 +59,7 @@ const Update_Product = async(_, {productInput}, { product }) => {
   }
 }
 
-const Delete_Product = async(_, { _id }, { product, review }) => {
+const Product_Delete = async(_, { _id }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try { 
@@ -77,7 +75,7 @@ const Delete_Product = async(_, { _id }, { product, review }) => {
   }
 }
 
-const Update_Quantity = async(_, { _id, option, value }, { product }) => {
+const Update_Quantity = async(_, { _id, option, value }) => {
   try { 
     if(option === "INC"){
       await product.findByIdAndUpdate(_id, {$inc: { quantity: value}});
@@ -92,19 +90,19 @@ const Update_Quantity = async(_, { _id, option, value }, { product }) => {
 
 module.exports = {
   Query: {
-    Get_Products,
-    Get_Product
+    Products_Get,
+    Product_Get
   },
   Mutation: {
-    Save_Product,
-    Delete_Product,
+    Product_Save,
+    Product_Delete,
     Update_Quantity
   },
   Product: {
-    category: async(parent, args, { category })=>{
+    category: async(parent, args)=>{
       return await category.findById(parent.categoryId);
     },
-    reviews: async(parent, args, { review })=>{
+    reviews: async(parent, args)=>{
       return await review.find({productId: parent._id, isRemove: false});
     }
   }

@@ -7,13 +7,13 @@ const categorySchema = [`
   }
 
   type Query {
-    Get_Categories(filter: Category_Filter, option: Option): [Category!]!
-    Get_Category(id: String!): Category
+    Categories_Get(filter: Category_Filter, option: Option): [Category!]!
+    Category_Get(id: String!): Category
   }
 
   type Mutation {
-    Save_Category(categoryInput: Category_Input): ID
-    Delete_Category(_id: String!): Boolean
+    Category_Save(categoryInput: Category_Input): ID
+    Category_Delete(_id: String!): Boolean
   }
 
   input Category_Filter {
