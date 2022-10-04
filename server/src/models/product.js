@@ -29,8 +29,13 @@ const schema = new Schema({
     type: String,
     require: true
   },
+  isRemove: {
+    type: Boolean,
+    default: false
+  }
 }, {
   collection: collectionName,
+  timestamps: true,
   _id: false
 });
 

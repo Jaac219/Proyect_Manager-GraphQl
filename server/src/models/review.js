@@ -18,13 +18,20 @@ const schema = new Schema({
     type: String
   },
   rating: {
-    type: Number
+    type: String
   },
   productId: {
     type: String,
     require: true
   },
+  isRemove: {
+    type: Boolean,
+    default: false
+  }
 },{
   collection: collectionName,
+  timestamps: true,
   _id: false
 })
+
+module.exports = model(collectionName, schema);

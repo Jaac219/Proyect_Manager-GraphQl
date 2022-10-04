@@ -9,9 +9,14 @@ const schema = new Schema({
   name: {
     type: String,
     require: true
+  },
+  isRemove: {
+    type: Boolean,
+    default: false
   }
 },{
-  collation: collectionName,
+  collection: collectionName,
+  timestamps: true,
   _id: false
 });
 
