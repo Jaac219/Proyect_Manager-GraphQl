@@ -3,12 +3,10 @@ const categorySchema = [`
     _id: String!
     name: String!
     products: [Product]
-    isRemove: Boolean
   }
 
   type Query {
     Categories_Get(filter: Category_Filter, option: Option): [Category!]!
-    Category_Get(id: String!): Category
   }
 
   type Mutation {
@@ -17,6 +15,7 @@ const categorySchema = [`
   }
 
   input Category_Filter {
+    _id: String
     name: String
   }
 

@@ -23,7 +23,8 @@ const schema = new Schema({
     type: Number
   },
   onSale: {
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   categoryId: {
     type: String,

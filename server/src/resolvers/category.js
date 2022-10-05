@@ -1,17 +1,39 @@
 const { category, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
-const { default: mongoose } = require("mongoose");
 
 const Categories_Get = async (_, {filter = {}, option = {}}) => {
   try {
-    let { skip, limit } = handlePagination(option);
-    let { name } = filter;
+    const { skip, limit } = handlePagination(option);
 
-    filter.isRemove = false;
-    if(name) filter.name = { $regex: name, $options: 'i' }
+    const query = { isRemove: false };
 
-    const find = category.find(filter);
+    const { _id, name } = filter;
+
+    if(_id) query._id = _id;
+    if(name) query.name = { $regex: name, $options: 'i' }
+
+    const find = category.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id",
+          foreignField: "categoryId",
+          as: "products",
+          pipeline: [
+            {
+              $lookup: {
+                from: "review",
+                localField: "_id",
+                foreignField: "productId",
+                as: "reviews"
+              }
+            }
+          ]
+        }
+      }
+    ]);
 
     if(limit) find.limit(limit);
     if(skip) find.skip(skip);
@@ -22,19 +44,11 @@ const Categories_Get = async (_, {filter = {}, option = {}}) => {
   }
 }
 
-const Category_Get = async (_, { id }) => {
-  try {
-    return await category.findById(id);
-  } catch (error) {
-    return error;
-  }
-}
-
 const Category_Save = async (_, { categoryInput }) => {
   try {
-    console.log(categoryInput)
-    if(categoryInput._id) return await Category_Update(_, { categoryInput });
-    return await Category_Create(_, { categoryInput });
+    return categoryInput._id
+      ? await Category_Update(_, { categoryInput })
+      : await Category_Create(_, { categoryInput });
   } catch (error) {
     return error;
   }
@@ -42,9 +56,12 @@ const Category_Save = async (_, { categoryInput }) => {
 
 const Category_Create = async (_, { categoryInput }) => {
   try {
+    const { name } = categoryInput;
     const _id = generateId();
-    await category({ _id, ...categoryInput }).save();
+
+    await category({ _id, name }).save();
     return _id;
+
   } catch (error) {
     return error;
   }
@@ -52,41 +69,34 @@ const Category_Create = async (_, { categoryInput }) => {
 
 const Category_Update = async (_, { categoryInput }) => {
   try {
-    await category.findByIdAndUpdate(categoryInput._id, { $set: categoryInput }, { new: true });
-    return categoryInput._id;
+    const { _id, name } = categoryInput;
+
+    await category.findByIdAndUpdate(_id, 
+      { $set: {
+        name
+      } }, { new: true });
+
+    return _id;
   } catch (error) {
     return error;
   }
 }
 
 const Category_Delete = async (_, { _id }) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     await category.findByIdAndUpdate(_id, { $set: { isRemove: true } });
-    await product.updateMany({categoryId: _id}, {$set: {categoryId: null}});
-    await session.commitTransaction();
-  } catch (error) {
-    await session.abortTransaction();
-    return error;
-  } finally {
-    session.endSession();
     return true;
+  } catch (error) {
+    return error;
   }
 }
 
 module.exports = {
   Query: {
-    Categories_Get,
-    Category_Get
+    Categories_Get
   },
   Mutation: {
     Category_Save,
     Category_Delete
-  },
-  Category: {
-    products: async (parent, args, { product }) =>{
-      return await product.find({categoryId: parent._id, isRemove: false});
-    }
   }
 }

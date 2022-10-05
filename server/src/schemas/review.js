@@ -1,18 +1,15 @@
 const reviewSchema = [`
   type Review {
     _id: String!
-    date: GraphQLDateTime!
     title: String!
     comment: String!
-    rating: Select_Rating
+    rating: Int
     productId: String!
-    product: Product!
-    isRemove: Boolean
+    createdAt: GraphQLDateTime
   }
 
   type Query {
     Reviews_Get(filter: Review_Filter, option: Option): [Review!]!
-    Review_Get(id: String!): Review
   }
 
   type Mutation {
@@ -21,28 +18,19 @@ const reviewSchema = [`
   }
 
   input Review_Filter {
-    date: GraphQLDateTime
+    _id: String
     title: String
-    comment: String
-    rating: Select_Rating
+    rating: Int
     productId: String
+    createdAt: GraphQLDateTime
   }
 
   input Review_Input {
     _id: String
-    date: GraphQLDateTime
     title: String
     comment: String
-    rating: Select_Rating
+    rating: Int
     productId: String
-  }
-
-  enum Select_Rating {
-    EXCELENTE
-    BUENO
-    PROMEDIO
-    MALO
-    MUYMALO
   }
 `]
 

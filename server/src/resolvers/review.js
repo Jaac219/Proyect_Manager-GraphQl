@@ -4,15 +4,25 @@ const { generateId, handlePagination } = require("@codecraftkit/utils");
 
 const Reviews_Get = async (_, { filter = {}, option = {} }) => {
   try {
-    let { skip, limit } = handlePagination(option);
-    let { date, title, comment, rating } = filter;
+    const { skip, limit } = handlePagination(option);
 
-    filter.isRemove = false;
-    if(date) filter.date = new Date(date);
-    if(title) filter.title = { $regex: title, $options: 'i'}
-    if(comment) filter.comment = { $regex: comment, $options: 'i'}
+    const query = { isRemove: false };
 
-    const find = review.find(filter);
+    const { 
+      _id,
+      title,
+      rating,
+      productId,
+      createdAt
+    } = filter;
+
+    if(_id) query._id = _id;
+    if(title) query.title = { $regex: title, $options: 'i'}
+    if(rating) query.rating = rating;
+    if(productId) query.productId = productId;
+    if(createdAt) query.createdAt = new Date(date);
+
+    const find = review.find(query);
 
     if(limit) find.limit(limit);
     if(skip) find.skip(skip);
@@ -23,18 +33,11 @@ const Reviews_Get = async (_, { filter = {}, option = {} }) => {
   }
 }
 
-const Review_Get = async (_, { id }) => {
-  try {
-    return await review.findById(id);
-  } catch (error) {
-    return error;
-  }
-}
-
 const Review_Save = async (_, { reviewInput }) => {
   try {
-    if(reviewInput._id) return await Review_Update(_, { reviewInput })
-    return await Review_Create(_, { reviewInput })
+    return reviewInput._id
+      ? await Review_Update(_, { reviewInput }) 
+      : await Review_Create(_, { reviewInput });
   } catch (error) {
     return error;
   }
@@ -43,7 +46,22 @@ const Review_Save = async (_, { reviewInput }) => {
 const Review_Create = async (_, { reviewInput }) => {
   try {
     const _id = generateId();
-    await new review({ _id, ...reviewInput }).save();
+
+    const {
+      title,
+      comment,
+      rating,
+      productId
+    } = reviewInput;
+
+    await new review({ 
+      _id,
+      title,
+      comment,
+      rating,
+      productId
+    }).save();
+
     return _id;
   } catch (error) {
     return error;
@@ -52,8 +70,24 @@ const Review_Create = async (_, { reviewInput }) => {
 
 const Review_Update = async (_, { reviewInput }) => {
   try {
-    await review.findByIdAndUpdate(reviewInput._id, { $set: reviewInput }, {new: true});
-    return reviewInput._id;
+
+    const {
+      _id,
+      title,
+      comment,
+      rating,
+      productId
+    } = reviewInput;
+
+    await review.findByIdAndUpdate(_id, 
+      {$set: {
+        title,
+        comment,
+        rating,
+        productId
+      }}, {new: true});
+
+    return _id;
   } catch (error) {
     return error;
   }
@@ -70,16 +104,10 @@ const Review_Delete = async (_, { _id }) => {
 
 module.exports = {
   Query: {
-    Reviews_Get,
-    Review_Get
+    Reviews_Get
   },
   Mutation: {
     Review_Save,
     Review_Delete
-  },
-  Review:{
-    product:  async (parent, args) => {
-      return await product.findById(parent.productId);
-    }
   }
 }
