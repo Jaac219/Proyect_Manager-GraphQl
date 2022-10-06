@@ -133,9 +133,38 @@ const Product_Delete = async(_, { _id }) => {
   }
 }
 
+const Product_Count = async(_, {filter = {}}) =>{
+  try {
+    const query = { isRemove: false };
+
+    const { 
+      _id,
+      name, 
+      quantity,
+      price,
+      onSale,
+      categoryId
+    } = filter;
+    
+    if(_id) query._id = _id;
+    if(name) query.name = { $regex: name, $options: 'i' };
+    if(quantity) query.quantity = quantity;
+    if(price) query.price = price;
+    if(onSale) query.onSale = onSale;
+    if(categoryId) query.categoryId = categoryId;
+
+    return await product.countDocuments(query);
+
+  } catch (error) {
+    return error
+  }
+
+}
+
 module.exports = {
   Query: {
-    Products_Get
+    Products_Get,
+    Product_Count
   },
   Mutation: {
     Product_Save,

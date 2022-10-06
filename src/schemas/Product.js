@@ -13,6 +13,7 @@ const productSchema = [`
 
   type Query {
     Products_Get(filter: Product_Filter, option: Option): [Product!]!
+    Product_Count(filter: Product_Filter):Int
   }
 
   type Mutation {
