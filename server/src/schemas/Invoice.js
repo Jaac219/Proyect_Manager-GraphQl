@@ -2,8 +2,9 @@ const invoiceSchema = [`
   type Invoice {
     _id: String!
     number: Int!
+    invoiceIva: Float
+    invoicePrice: Float
     totalPrice: Float
-    iva: Float
     productsOrder: [Product_Order!]!
     isRemove: Boolean
   }
@@ -19,25 +20,32 @@ const invoiceSchema = [`
 
   type Product_Order {
     productId: String
+    productName: String
     cant: Int
-    value: Float
+    iva: Float
+    unitPrice: Float
+    subtotal: Float
+    totalValue: Float
   }
 
   input Invoice_Filter {
     _id: String
     number: Int
+    createdAt: GraphQLDateTime
+    productName: String
     productId: String
   }
 
   input Invoice_Input {
-    _id: String
+    _id: String 
     number: String
-    productsOrder: [Product_Order_Input]
+    productsOrder: [Product_Order_Input!]
   }
 
   input Product_Order_Input {
     productId: String
     cant: Int
+    iva: Int
   }
 
 `];

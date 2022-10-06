@@ -1,4 +1,4 @@
-const { invoice } = require("../models");
+const { invoice, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -6,16 +6,31 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
   try {
     const { skip, limit } = handlePagination();
 
-    const query = { isRemove: false }
+    let query = { isRemove: false }
 
     const {
       _id,
-      number
+      number,
+      createdAt,
+      productName,
+      productId
     } = filter;
 
+    
     if(_id) query._id = _id;
     if(number) query.number = number;
-
+    if(createdAt) query.createdAt = {
+      $gte: new Date(createdAt), 
+      $lte: new Date(`${createdAt}T23:59:59.999Z`)
+    };
+    if(productName) query = {...query, 
+      'productsOrder.productName': {
+        $regex: productName, 
+        $options: 'i'
+      }}
+    if(productId) query = {...query, 
+      'productsOrder.productId': productId}
+    
     const find = invoice.find(query);
 
     if(skip) find.skip(skip);
@@ -42,15 +57,48 @@ const Invoice_Create = async (_, { invoiceInput }) => {
   try {
     const _id = generateId();
 
-    const {
+    /** variables valor e iva total de la factura */
+    let invoicePrice = 0, invoiceIva = 0;
+
+    let {
       number,
       productsOrder
     } = invoiceInput;
 
+    /** Se genera una promesa pending por cada producto actualizar */
+    promises = productsOrder.map(async (order) => {
+      
+      const { productId, cant, iva } = order;
+      
+      /** Actualización stock de cada producto */  
+      const find = await product.findByIdAndUpdate(
+        productId, 
+        { $inc: { quantity: -cant}
+      });
+
+      /** Calculos datos de la factura y ordenes */
+      order.productName = find.name;
+      order.unitPrice = find.price;
+      order.subtotal = cant * find.price;
+      order.iva = order.subtotal * (iva/100);
+      order.totalValue = order.iva + order.subtotal;
+
+      invoiceIva += order.iva;
+      invoicePrice += order.subtotal;
+
+      return order;
+    });
+
+    /** Resolución de las promesas */
+    await Promise.all(promises);
+
     await new invoice({ 
       _id,
       number,
-      productsOrder
+      invoicePrice,
+      invoiceIva,
+      productsOrder,
+      totalPrice: invoiceIva+invoicePrice,
     }).save();
 
     return _id;

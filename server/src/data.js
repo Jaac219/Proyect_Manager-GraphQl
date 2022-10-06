@@ -89,7 +89,7 @@ db.review.insertMany([
     "date": "2022-10-04",
     "title": "Televisor muy malo",
     "comment": "Dejo de funcionar a los 5 dias",
-    "Rating": 1,
+    "rating": 1,
     "productId": "XS6RIW5TEvnGs8abc",
     "isRemove": false
   },
@@ -98,7 +98,7 @@ db.review.insertMany([
     "date": "2022-10-01",
     "title": "Buen microhondas",
     "comment": "Calienta rapido la comida",
-    "Rating": 5,
+    "rating": 5,
     "productId": "XS6RIW5TEvnGs8rty",
     "isRemove": false
   },
@@ -107,7 +107,7 @@ db.review.insertMany([
     "date": "2022-10-15",
     "title": "Taladro revision",
     "comment": "Esta bien para su precio",
-    "Rating": 3,
+    "rating": 3,
     "productId": "XS6RIW5TEvnGs8ghj",
     "isRemove": false
   }

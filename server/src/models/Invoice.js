@@ -10,6 +10,15 @@ const schema = new Schema({
     type: String,
     require: true
   },
+  invoicePrice: {
+    type: Number
+  },
+  invoiceIva: {
+    type: Number
+  },
+  totalPrice: {
+    type: Number
+  },
   productsOrder:{
     type: Array
   },

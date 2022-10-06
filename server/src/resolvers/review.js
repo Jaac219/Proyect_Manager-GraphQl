@@ -20,7 +20,10 @@ const Reviews_Get = async (_, { filter = {}, option = {} }) => {
     if(title) query.title = { $regex: title, $options: 'i'}
     if(rating) query.rating = rating;
     if(productId) query.productId = productId;
-    if(createdAt) query.createdAt = new Date(date);
+    if(createdAt) query.createdAt = {
+      $gte: new Date(createdAt), 
+      $lte: new Date(`${createdAt}T23:59:59.999Z`)
+    };
 
     const find = review.find(query);
 
@@ -61,6 +64,19 @@ const Review_Create = async (_, { reviewInput }) => {
       rating,
       productId
     }).save();
+
+    const ratings = await review.aggregate([
+      {$group : {
+        _id: "$productId",
+        rating: {$avg: "$rating"}
+      }}
+    ]);
+  
+    const promises = ratings.map(async (val)=>{
+      await product.findByIdAndUpdate(val._id, {$set: {rating: val.rating}})
+    });
+  
+    await Promise.all(promises);
 
     return _id;
   } catch (error) {

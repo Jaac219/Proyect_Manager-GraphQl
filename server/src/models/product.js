@@ -14,7 +14,8 @@ const schema = new Schema({
     type: String
   },
   quantity: {
-    type: Number
+    type: Number,
+    min: 0
   },
   image: {
     type: String
@@ -25,6 +26,9 @@ const schema = new Schema({
   onSale: {
     type: Boolean,
     default: false
+  },
+  rating: {
+    type: Number
   },
   categoryId: {
     type: String,
