@@ -133,19 +133,6 @@ const Product_Delete = async(_, { _id }) => {
   }
 }
 
-// const Update_Quantity = async(_, { _id, option, value }) => {
-//   try { 
-//     if(option === "INC"){
-//       await product.findByIdAndUpdate(_id, {$inc: { quantity: value}});
-//     } else if (option === "DEC") {
-//       await product.findByIdAndUpdate(_id, {$inc: { quantity: -value}});
-//     }
-//     return true;
-//   } catch (error) {
-//     return error;
-//   }
-// }
-
 module.exports = {
   Query: {
     Products_Get
