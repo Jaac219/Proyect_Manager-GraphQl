@@ -26,6 +26,5 @@ async function start() {
   })
 }
 
-
-//rama desarrollo 
+//rama main 
 start();
