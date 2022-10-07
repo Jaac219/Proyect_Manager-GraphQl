@@ -118,9 +118,33 @@ const Review_Delete = async (_, { _id }) => {
   }
 }
 
+const Review_Count = async (_, { filter = {} }) => {
+  const query = { isRemove: false };
+
+  const { 
+    _id,
+    title,
+    rating,
+    productId,
+    createdAt
+  } = filter;
+
+  if(_id) query._id = _id;
+  if(title) query.title = { $regex: title, $options: 'i'}
+  if(rating) query.rating = rating;
+  if(productId) query.productId = productId;
+  if(createdAt) query.createdAt = {
+    $gte: new Date(createdAt), 
+    $lte: new Date(`${createdAt}T23:59:59.999Z`)
+  };
+
+  return await review.countDocuments(query);
+}
+
 module.exports = {
   Query: {
-    Reviews_Get
+    Reviews_Get,
+    Review_Count
   },
   Mutation: {
     Review_Save,

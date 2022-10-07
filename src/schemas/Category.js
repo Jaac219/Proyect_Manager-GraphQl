@@ -7,6 +7,7 @@ const categorySchema = [`
 
   type Query {
     Categories_Get(filter: Category_Filter, option: Option): [Category!]!
+    Category_Count(filter: Category_Filter):Int
   }
 
   type Mutation {

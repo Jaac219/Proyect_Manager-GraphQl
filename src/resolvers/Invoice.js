@@ -136,9 +136,38 @@ const Invoice_Delete = async (_, { _id }) => {
   }
 }
 
+const Invoice_Count = async (_, {  }) => {
+  let query = { isRemove: false }
+
+  const {
+    _id,
+    number,
+    createdAt,
+    productName,
+    productId
+  } = filter;
+  
+  if(_id) query._id = _id;
+  if(number) query.number = number;
+  if(createdAt) query.createdAt = {
+    $gte: new Date(createdAt), 
+    $lte: new Date(`${createdAt}T23:59:59.999Z`)
+  };
+  if(productName) query = {...query, 
+    'productsOrder.productName': {
+      $regex: productName, 
+      $options: 'i'
+    }}
+  if(productId) query = {...query, 
+    'productsOrder.productId': productId}
+
+    return await invoice.countDocuments(query);
+}
+
 module.exports = {
   Query: {
-    Invoices_Get
+    Invoices_Get,
+    Invoice_Count
   },
   Mutation: {
     Invoice_Save,

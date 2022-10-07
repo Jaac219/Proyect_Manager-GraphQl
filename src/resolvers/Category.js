@@ -5,10 +5,9 @@ const { generateId, handlePagination } = require("@codecraftkit/utils");
 const Categories_Get = async (_, {filter = {}, option = {}}) => {
   try {
     const { skip, limit } = handlePagination(option);
-
-    const query = { isRemove: false };
-
     const { _id, name } = filter;
+    
+    const query = { isRemove: false };
 
     if(_id) query._id = _id;
     if(name) query.name = { $regex: name, $options: 'i' }
@@ -91,9 +90,25 @@ const Category_Delete = async (_, { _id }) => {
   }
 }
 
+const Category_Count = async (_, { filter = {} }) => {
+  try {
+    const query = { isRemove: false };
+    const { _id, name } = filter;
+    
+    if(_id) query._id = _id;
+    if(name) query.name = { $regex: name, $options: 'i' }
+
+    return await category.countDocuments(query);
+
+  } catch (error) {
+    return error;
+  }
+}
+
 module.exports = {
   Query: {
-    Categories_Get
+    Categories_Get,
+    Category_Count
   },
   Mutation: {
     Category_Save,

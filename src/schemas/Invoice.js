@@ -11,6 +11,7 @@ const invoiceSchema = [`
 
   type Query {
     Invoices_Get(filter: Invoice_Filter, option: Option): [Invoice]
+    Invoice_Count(filter: Invoice_Filter):Int
   }
 
   type Mutation {
