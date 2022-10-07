@@ -2,8 +2,8 @@ const invoiceSchema = [`
   type Invoice {
     _id: String!
     number: Int!
-    invoiceIva: Float
     invoicePrice: Float
+    invoiceIva: Float
     totalPrice: Float
     productsOrder: [Product_Order!]!
     isRemove: Boolean
@@ -23,9 +23,9 @@ const invoiceSchema = [`
     productId: String
     productName: String
     cant: Int
-    iva: Float
     unitPrice: Float
     subtotal: Float
+    iva: Float
     totalValue: Float
   }
 
