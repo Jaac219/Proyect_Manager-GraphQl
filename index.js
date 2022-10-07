@@ -12,7 +12,7 @@ const typeDefs = require("./src/merge/mergeSchemas.js");
 const resolvers = require("./src/merge/mergeResolvers.js");
 
 app.get('/', (req, res) =>{
-  res.redirect(`http://localhost:${PORT}/graphql`);
+  res.send('welcome');
 })
 
 async function start() {
@@ -26,4 +26,6 @@ async function start() {
   })
 }
 
+
+//rama desarrollo 
 start();
