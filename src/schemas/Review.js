@@ -10,6 +10,7 @@ const reviewSchema = [`
 
   type Query {
     Reviews_Get(filter: Review_Filter, option: Option): [Review!]!
+    Review_Count(filter: Review_Filter):Int
   }
 
   type Mutation {

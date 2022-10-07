@@ -86,30 +86,33 @@ db.product.insertMany([
 db.review.insertMany([
   {
     "_id": "abcRIW5TEvnGs8mnb",
-    "date": "2022-10-04",
     "title": "Televisor muy malo",
     "comment": "Dejo de funcionar a los 5 dias",
     "rating": 1,
     "productId": "XS6RIW5TEvnGs8abc",
-    "isRemove": false
+    "isRemove": false,
+    "createdAt": "2022-10-06T17:44:50.584+00:00",
+    "updatedAt": "2022-10-06T17:44:50.584+00:00"
   },
   {
     "_id": "cvARIW5TEvnGs8mnb",
-    "date": "2022-10-01",
     "title": "Buen microhondas",
     "comment": "Calienta rapido la comida",
     "rating": 5,
     "productId": "XS6RIW5TEvnGs8rty",
-    "isRemove": false
+    "isRemove": false,
+    "createdAt": "2022-10-06T17:44:50.584+00:00",
+    "updatedAt": "2022-10-06T17:44:50.584+00:00"
   },
   {
     "_id": "XS6asFGTEvnGs8mnb",
-    "date": "2022-10-15",
     "title": "Taladro revision",
     "comment": "Esta bien para su precio",
     "rating": 3,
     "productId": "XS6RIW5TEvnGs8ghj",
-    "isRemove": false
+    "isRemove": false,
+    "createdAt": "2022-10-10T17:44:50.584+00:00",
+    "updatedAt": "2022-10-10T17:44:50.584+00:00"
   }
 ]);
 
