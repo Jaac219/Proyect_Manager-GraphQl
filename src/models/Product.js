@@ -15,13 +15,15 @@ const schema = new Schema({
   },
   quantity: {
     type: Number,
-    min: 0
+    min: 0,
+    default: 1
   },
   image: {
     type: String
   },
   price: {
-    type: Number
+    type: Number,
+    default: 0
   },
   onSale: {
     type: Boolean,
