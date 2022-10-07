@@ -20,7 +20,6 @@ const productSchema = [`
   type Mutation {
     Product_Save(productInput: Product_Input): ID
     Product_Delete(_id: String!): Boolean
-    Update_Quantity(_id: String!, value: Int!): Boolean
   }
 
   input Product_Filter {
