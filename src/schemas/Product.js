@@ -6,9 +6,10 @@ const productSchema = [`
     quantity: Int!
     image: String
     price: Float!
+    rating: Int
     onSale: Boolean!
     categoryId: String
-    reviews: [Review!]!
+    reviews: [Review]
   }
 
   type Query {
