@@ -31,13 +31,55 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
     if(productId) query = {...query, 
       'productsOrder.productId': productId}
     
-    const find = invoice.find(query);
+    const find = invoice.aggregate([
+      {$match: query},
+      {
+        $lookup: {
+          from: 'invoice',
+          as: 'items',
+          pipeline: [
+            {$unwind: "$productsOrder"},
+            {
+              $lookup: {
+                from: 'product',
+                localField: 'productsOrder.productId',
+                foreignField: '_id',
+                as: 'product'
+              }
+            },
+            { $unwind: "$product"},
+            {
+              $project: {
+                _id : 0,
+                "name": "$product.name",
+                "unitVal": "$product.price",
+                "cant": "$productsOrder.cant",
+                "iva": "$productsOrder.iva",
+                "subtotal": {$multiply: ["$product.price", "$productsOrder.cant"]}
+              },
+            },
+          ],
+        }
+      },
+      {
+        $project: {
+          number: "$number",
+          productsOrder: "$productsOrder",
+          items: "$items",
+          subtotalInvoice: {$sum: "$items.subtotal"}
+        }
+      }
+    ]);
 
     if(skip) find.skip(skip);
     if(limit) find.limit(limit);
 
-    return await find.exec();
+    
+    let res = await find.exec();
 
+    console.log(res[0])
+
+    return res;
   } catch (error) {
     return error;
   }
@@ -58,7 +100,7 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     const _id = generateId();
 
     /** variables valor e iva total de la factura */
-    let invoicePrice = 0, invoiceIva = 0;
+    // let invoicePrice = 0, invoiceIva = 0;
 
     let {
       number,
@@ -66,39 +108,39 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     } = invoiceInput;
 
     /** Se genera una promesa pending por cada producto actualizar */
-    promises = productsOrder.map(async (order) => {
+    // promises = productsOrder.map(async (order) => {
       
-      const { productId, cant, iva } = order;
+    //   const { productId, cant, iva } = order;
       
-      /** Actualización stock de cada producto */  
-      const find = await product.findByIdAndUpdate(
-        productId, 
-        { $inc: { quantity: -cant}
-      });
+    //   /** Actualización stock de cada producto */  
+    //   const find = await product.findByIdAndUpdate(
+    //     productId, 
+    //     { $inc: { quantity: -cant}
+    //   });
 
-      /** Calculos datos de la factura y ordenes */
-      order.productName = find.name;
-      order.unitPrice = find.price;
-      order.subtotal = cant * find.price;
-      order.iva = order.subtotal * (iva/100);
-      order.totalValue = order.iva + order.subtotal;
+    //   /** Calculos datos de la factura y ordenes */
+    //   order.productName = find.name;
+    //   order.unitPrice = find.price;
+    //   order.subtotal = cant * find.price;
+    //   order.iva = order.subtotal * (iva/100);
+    //   order.totalValue = order.iva + order.subtotal;
 
-      invoiceIva += order.iva;
-      invoicePrice += order.subtotal;
+    //   invoiceIva += order.iva;
+    //   invoicePrice += order.subtotal;
 
-      return order;
-    });
+    //   return order;
+    // });
 
     /** Resolución de las promesas */
-    await Promise.all(promises);
+    // await Promise.all(promises);
 
     await new invoice({ 
       _id,
       number,
-      invoicePrice,
-      invoiceIva,
+      // invoicePrice,
+      // invoiceIva,
       productsOrder,
-      totalPrice: invoiceIva+invoicePrice,
+      // totalPrice: invoiceIva+invoicePrice,
     }).save();
 
     return _id;
