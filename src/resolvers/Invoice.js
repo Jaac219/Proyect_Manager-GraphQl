@@ -67,14 +67,12 @@ const Invoice_Create = async (_, { invoiceInput }) => {
 
     /** Se genera una promesa pending por cada producto actualizar */
     promises = productsOrder.map(async (order) => {
-      
       const { productId, cant, iva } = order;
-      
       /** Actualización stock de cada producto */  
       const find = await product.findByIdAndUpdate(
         productId, 
-        { $inc: { quantity: -cant}
-      });
+        { $inc: { quantity: -cant }
+      }, {new: true, runValidators: true});
 
       /** Calculos datos de la factura y ordenes */
       order.productName = find.name;
