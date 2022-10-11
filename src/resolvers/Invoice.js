@@ -70,9 +70,13 @@ const Invoice_Create = async (_, { invoiceInput }) => {
       const { productId, cant, iva } = order;
       /** Actualización stock de cada producto */  
       const find = await product.findByIdAndUpdate(
-        productId, 
-        { $inc: { quantity: -cant }
-      }, {new: true, runValidators: true});
+        productId,
+         { $inc: { quantity: -cant } }, 
+        { new: true, runValidators: true }
+      );
+
+
+      console.log(find)
 
       /** Calculos datos de la factura y ordenes */
       order.productName = find.name;

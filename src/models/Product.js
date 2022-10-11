@@ -15,7 +15,7 @@ const schema = new Schema({
   },
   quantity: {
     type: Number,
-    min: 0,
+    minimum: 0,
     default: 1
   },
   image: {
