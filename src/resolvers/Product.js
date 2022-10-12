@@ -1,7 +1,6 @@
-const { product, review } = require("../models");
+const { product, review, mongoose } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
-const { default: mongoose } = require("mongoose");
 
 const Products_Get = async(_, {filter = {}, option = {}}) =>{
   try {

@@ -30,6 +30,7 @@ const productSchema = [`
     quantity: Int
     price: Float
     onSale: Boolean
+    categoryId: String
   }
 
   input Product_Input {

@@ -1,4 +1,4 @@
-const { invoice, product } = require("../models");
+const { invoice, product, mongoose } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -54,29 +54,35 @@ const Invoice_Save = async (_, { invoiceInput }) => {
 }
 
 const Invoice_Create = async (_, { invoiceInput }) => {
+  
   try {
     const _id = generateId();
-
+    
     /** variables valor e iva total de la factura */
     let invoicePrice = 0, invoiceIva = 0;
-
+    let arrNewQuantity = [];
+    
     let {
       number,
       productsOrder
     } = invoiceInput;
-
+    
     /** Se genera una promesa pending por cada producto actualizar */
     promises = productsOrder.map(async (order) => {
+
       const { productId, cant, iva } = order;
-      /** Actualización stock de cada producto */  
-      const find = await product.findByIdAndUpdate(
-        productId,
-         { $inc: { quantity: -cant } }, 
-        { new: true, runValidators: true }
-      );
+      // let find = await product.findByIdAndUpdate(
+      //   productId,
+      //   { $inc: { quantity: -cant } }, 
+      //   { new: true, runValidators: true }
+      // )
 
+      /** Actualización stock de cada producto */ 
+      let find = await product.findById(productId);
+      let quantity = find.quantity - cant;
 
-      console.log(find)
+      arrNewQuantity.push({_id: productId, quantity});
+      if(quantity < 0) throw new Error("Producto cantidad menor que 0");
 
       /** Calculos datos de la factura y ordenes */
       order.productName = find.name;
@@ -91,8 +97,14 @@ const Invoice_Create = async (_, { invoiceInput }) => {
       return order;
     });
 
+    
     /** Resolución de las promesas */
     await Promise.all(promises);
+
+    arrNewQuantity.forEach(async (vl)=>{
+      const { _id, quantity } = vl;
+      await product.findByIdAndUpdate(_id, {$set: {quantity}})
+    });
 
     await new invoice({ 
       _id,
@@ -102,9 +114,9 @@ const Invoice_Create = async (_, { invoiceInput }) => {
       productsOrder,
       totalPrice: invoiceIva+invoicePrice,
     }).save();
-
+    
     return _id;
-
+    
   } catch (error) {
     return error;
   }
