@@ -71,39 +71,33 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     promises = productsOrder.map(async (order) => {
 
       const { productId, cant, iva } = order;
-      // let find = await product.findByIdAndUpdate(
-      //   productId,
-      //   { $inc: { quantity: -cant } }, 
-      //   { new: true, runValidators: true }
-      // )
 
-      /** Actualización stock de cada producto */ 
       let find = await product.findById(productId);
+      
       let quantity = find.quantity - cant;
-
       arrNewQuantity.push({_id: productId, quantity});
       if(quantity < 0) throw new Error("Producto cantidad menor que 0");
-
-      /** Calculos datos de la factura y ordenes */
+      
+      /** Calculos datos de la factura y sus items */
       order.productName = find.name;
       order.unitPrice = find.price;
       order.subtotal = cant * find.price;
       order.iva = order.subtotal * (iva/100);
       order.totalValue = order.iva + order.subtotal;
-
+      
       invoiceIva += order.iva;
       invoicePrice += order.subtotal;
-
+      
       return order;
     });
-
     
     /** Resolución de las promesas */
     await Promise.all(promises);
-
+    
+    /** Actualización stock de cada producto */
     arrNewQuantity.forEach(async (vl)=>{
       const { _id, quantity } = vl;
-      await product.findByIdAndUpdate(_id, {$set: {quantity}})
+      await product.findByIdAndUpdate(_id, {$set: {quantity}});
     });
 
     await new invoice({ 
