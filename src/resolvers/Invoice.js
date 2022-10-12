@@ -9,6 +9,7 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
     const {
       _id,
       number,
+      client,
       createdAt,
       productName,
       productId
@@ -17,6 +18,7 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
     
     if(_id) query._id = _id;
     if(number) query.number = number;
+    if(client) query.client = {$regex: client, $options: 'í'};
     if(createdAt) query.createdAt = {
       $gte: new Date(createdAt), 
       $lte: new Date(`${createdAt}T23:59:59.999Z`)
@@ -62,6 +64,7 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     
     let {
       number,
+      client,
       productsOrder
     } = invoiceInput;
     
@@ -73,8 +76,9 @@ const Invoice_Create = async (_, { invoiceInput }) => {
       let find = await product.findById(productId);
       
       let quantity = find.quantity - cant;
-      arrNewQuantity.push({_id: productId, quantity});
       if(quantity < 0) throw new Error("Producto cantidad menor que 0");
+
+      arrNewQuantity.push({_id: productId, quantity});
       
       /** Calculos datos de la factura y sus items */
       order.productName = find.name;
@@ -101,6 +105,7 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     await new invoice({ 
       _id,
       number,
+      client,
       invoicePrice,
       invoiceIva,
       productsOrder,
@@ -118,14 +123,15 @@ const Invoice_Update = async (_, { invoiceInput }) => {
   try {
     const {
       _id,
-      number
+      number,
+      client
     } = invoiceInput;
 
     await invoice.findByIdAndUpdate(_id, 
     { $set: {
       _id,
       number,
-      productsOrder
+      client
     }}, { new: true })
 
   } catch (error) {
@@ -155,6 +161,7 @@ const Invoice_Count = async (_, {  }) => {
   const {
     _id,
     number,
+    client,
     createdAt,
     productName,
     productId
@@ -162,6 +169,7 @@ const Invoice_Count = async (_, {  }) => {
   
   if(_id) query._id = _id;
   if(number) query.number = number;
+  if(client) query.client = {$regex: client, $options: 'i'};
   if(createdAt) query.createdAt = {
     $gte: new Date(createdAt), 
     $lte: new Date(`${createdAt}T23:59:59.999Z`)

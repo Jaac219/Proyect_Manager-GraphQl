@@ -10,6 +10,9 @@ const schema = new Schema({
     type: String,
     require: true
   },
+  client: {
+    type: String
+  },
   invoicePrice: {
     type: Number
   },

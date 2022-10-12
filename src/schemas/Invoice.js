@@ -2,6 +2,7 @@ const invoiceSchema = [`
   type Invoice {
     _id: String!
     number: Int!
+    client: String
     invoicePrice: Float
     invoiceIva: Float
     totalPrice: Float
@@ -35,11 +36,13 @@ const invoiceSchema = [`
     createdAt: GraphQLDateTime
     productName: String
     productId: String
+    client: String
   }
 
   input Invoice_Input {
     _id: String 
     number: String
+    client: String
     productsOrder: [Product_Order_Input!]
   }
 
