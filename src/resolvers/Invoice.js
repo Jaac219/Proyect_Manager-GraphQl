@@ -51,11 +51,18 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
             {
               $project: {
                 _id : 0,
-                "name": "$product.name",
-                "unitVal": "$product.price",
+                "productId": "$product._id",
+                "productName": "$product.name",
+                "unitPrice": "$product.price",
                 "cant": "$productsOrder.cant",
-                "iva": "$productsOrder.iva",
-                "subtotal": {$multiply: ["$product.price", "$productsOrder.cant"]}
+                "subtotal": {$multiply: ["$product.price", "$productsOrder.cant"]},
+                "iva": {$multiply: ["$product.price", "$productsOrder.cant", {
+                  $divide: ["$productsOrder.iva", 100]}]},
+                "totalValue": {$sum: [
+                  {$multiply: ["$product.price", "$productsOrder.cant"]},
+                  {$multiply: ["$product.price", "$productsOrder.cant", {
+                    $divide: ["$productsOrder.iva", 100]}]}
+                ]}
               },
             },
           ],
@@ -64,9 +71,10 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
       {
         $project: {
           number: "$number",
-          productsOrder: "$productsOrder",
-          items: "$items",
-          subtotalInvoice: {$sum: "$items.subtotal"}
+          productsOrder: "$items",
+          invoicePrice: {$sum: "$items.subtotal"},
+          invoiceIva: {$sum: "$items.iva"},
+          totalPrice: {$sum: {$concatArrays: ["$items.subtotal", "$items.iva"]}}
         }
       }
     ]);
