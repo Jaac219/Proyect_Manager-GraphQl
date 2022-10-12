@@ -6,7 +6,7 @@ const invoiceSchema = [`
     invoiceIva: Float
     totalPrice: Float
     productsOrder: [Product_Order!]!
-    isRemove: Boolean
+    state: String!
   }
 
   type Query {
@@ -16,7 +16,7 @@ const invoiceSchema = [`
 
   type Mutation {
     Invoice_Save(invoiceInput: Invoice_Input!): ID
-    Invoice_Delete(_id: String!): Boolean
+    Invoice_Cancel(_id: String!): Boolean
   }
 
   type Product_Order {

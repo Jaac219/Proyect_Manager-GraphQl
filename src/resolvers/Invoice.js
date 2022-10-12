@@ -6,8 +6,6 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
   try {
     const { skip, limit } = handlePagination();
 
-    let query = { isRemove: false }
-
     const {
       _id,
       number,
@@ -135,10 +133,17 @@ const Invoice_Update = async (_, { invoiceInput }) => {
   }
 }
 
-const Invoice_Delete = async (_, { _id }) => {
+const Invoice_Cancel = async (_, { _id }) => {
   try {
-    await invoice.findByIdAndUpdate(_id, {$set: {isRemove: true}});
-    return true;
+    let find = await invoice.findOneAndUpdate({_id, state: {$ne: "CANCEL"}}, {$set: {state: "CANCEL"}});
+
+    find?.productsOrder.forEach(async (value)=>{
+      const { productId, cant } = value;
+      await product.findByIdAndUpdate(productId, {$inc: {quantity: cant}})
+    })
+
+    return find ? true : false; 
+
   } catch (error) {
     return error;
   }
@@ -179,6 +184,6 @@ module.exports = {
   },
   Mutation: {
     Invoice_Save,
-    Invoice_Delete
+    Invoice_Cancel
   }
 }
