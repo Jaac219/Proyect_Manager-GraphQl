@@ -27,8 +27,8 @@ const Reviews_Get = async (_, { filter = {}, option = {} }) => {
 
     const find = review.find(query);
 
-    if(limit) find.limit(limit);
     if(skip) find.skip(skip);
+    if(limit) find.limit(limit);
 
     return await find.exec();
   } catch (error) {

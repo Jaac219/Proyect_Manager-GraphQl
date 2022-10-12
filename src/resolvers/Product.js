@@ -1,4 +1,4 @@
-const { product, review, category } = require("../models");
+const { product, review } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 const { default: mongoose } = require("mongoose");
@@ -37,8 +37,8 @@ const Products_Get = async(_, {filter = {}, option = {}}) =>{
       }
     ]);
 
-    if(limit) find.limit(limit);
     if(skip) find.skip(skip);
+    if(limit) find.limit(limit);
 
     return await find.exec();
   } catch (error) {
