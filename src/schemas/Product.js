@@ -29,6 +29,7 @@ const productSchema = [`
     quantity: Int
     price: Float
     onSale: Boolean
+    categoryId: String
   }
 
   input Product_Input {
@@ -36,7 +37,7 @@ const productSchema = [`
     name: String
     description: String
     quantity: Int
-    image: String
+    image: Upload
     price: Float
     onSale: Boolean
     categoryId: String

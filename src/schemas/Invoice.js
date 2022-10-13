@@ -2,11 +2,12 @@ const invoiceSchema = [`
   type Invoice {
     _id: String!
     number: Int!
+    client: String
     invoicePrice: Float
     invoiceIva: Float
     totalPrice: Float
     productsOrder: [Product_Order!]!
-    isRemove: Boolean
+    state: String!
   }
 
   type Query {
@@ -16,7 +17,7 @@ const invoiceSchema = [`
 
   type Mutation {
     Invoice_Save(invoiceInput: Invoice_Input!): ID
-    Invoice_Delete(_id: String!): Boolean
+    Invoice_Cancel(_id: String!): Boolean
   }
 
   type Product_Order {
@@ -35,11 +36,13 @@ const invoiceSchema = [`
     createdAt: GraphQLDateTime
     productName: String
     productId: String
+    client: String
   }
 
   input Invoice_Input {
     _id: String 
     number: String
+    client: String
     productsOrder: [Product_Order_Input!]
   }
 

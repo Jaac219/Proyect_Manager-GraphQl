@@ -10,6 +10,9 @@ const schema = new Schema({
     type: String,
     require: true
   },
+  client: {
+    type: String
+  },
   invoicePrice: {
     type: Number
   },
@@ -22,9 +25,10 @@ const schema = new Schema({
   productsOrder:{
     type: Array
   },
-  isRemove: {
-    type: Boolean,
-    default: false
+  state: {
+    type: String,
+    enum : ['PAY','CANCEL'],
+    default: "PAY"
   }
 },{
   collection: collectionName,

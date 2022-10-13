@@ -1,4 +1,4 @@
-const { category, product } = require("../models");
+const { category } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 

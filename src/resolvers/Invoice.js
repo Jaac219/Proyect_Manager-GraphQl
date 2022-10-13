@@ -72,7 +72,6 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     promises = productsOrder.map(async (order) => {
 
       const { productId, cant, iva } = order;
-
       let find = await product.findById(productId);
       
       let quantity = find.quantity - cant;

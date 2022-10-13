@@ -15,7 +15,7 @@ const schema = new Schema({
   },
   quantity: {
     type: Number,
-    min: 0,
+    min:0,
     default: 1
   },
   image: {
@@ -43,7 +43,7 @@ const schema = new Schema({
 }, {
   collection: collectionName,
   timestamps: true,
-  _id: false
+  _id: false,
 });
 
 module.exports = model(collectionName, schema);
