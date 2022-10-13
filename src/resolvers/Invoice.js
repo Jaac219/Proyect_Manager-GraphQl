@@ -5,6 +5,7 @@ const { generateId, handlePagination } = require("@codecraftkit/utils");
 const Invoices_Get = async (_, { filter = {}, option = {} }) => {
   try {
     const { skip, limit } = handlePagination();
+    const query = {};
 
     const {
       _id,
@@ -14,7 +15,6 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
       productName,
       productId
     } = filter;
-
     
     if(_id) query._id = _id;
     if(number) query.number = number;
@@ -32,12 +32,61 @@ const Invoices_Get = async (_, { filter = {}, option = {} }) => {
       'productsOrder.productId': productId}
     
     const find = invoice.find(query);
+    
+    // const find = invoice.aggregate([
+    //   {$match: query},
+    //   {
+    //     $lookup: {
+    //       from: 'invoice',
+    //       as: 'items',
+    //       pipeline: [
+    //         {$unwind: "$productsOrder"},
+    //         {
+    //           $lookup: {
+    //             from: 'product',
+    //             localField: 'productsOrder.productId',
+    //             foreignField: '_id',
+    //             as: 'product'
+    //           }
+    //         },
+    //         { $unwind: "$product"},
+    //         {
+    //           $project: {
+    //             _id : 0,
+    //             "productId": "$product._id",
+    //             "productName": "$product.name",
+    //             "unitPrice": "$product.price",
+    //             "cant": "$productsOrder.cant",
+    //             "subtotal": {$multiply: ["$product.price", "$productsOrder.cant"]},
+    //             "iva": {$multiply: ["$product.price", "$productsOrder.cant", {
+    //               $divide: ["$productsOrder.iva", 100]}]},
+    //             "totalValue": {$sum: [
+    //               {$multiply: ["$product.price", "$productsOrder.cant"]},
+    //               {$multiply: ["$product.price", "$productsOrder.cant", {
+    //                 $divide: ["$productsOrder.iva", 100]}]}
+    //             ]},
+    //           },
+    //         },
+    //       ],
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       number: "$number",
+    //       client: "$client",
+    //       state: "$state",
+    //       productsOrder: "$items",
+    //       invoicePrice: {$sum: "$items.subtotal"},
+    //       invoiceIva: {$sum: "$items.iva"},
+    //       totalPrice: {$sum: {$concatArrays: ["$items.subtotal", "$items.iva"]}}
+    //     }
+    //   }
+    // ]);
 
     if(skip) find.skip(skip);
     if(limit) find.limit(limit);
-
+    
     return await find.exec();
-
   } catch (error) {
     return error;
   }

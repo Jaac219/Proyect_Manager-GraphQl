@@ -60,7 +60,7 @@ const Product_Save = async(_,  { productInput }) => {
 const Product_Create = async(_, { productInput }) => {
   try {
     const _id = generateId();
-
+    
     const {
       name,
       description,
@@ -70,29 +70,20 @@ const Product_Create = async(_, { productInput }) => {
       onSale,
       categoryId 
     } = productInput;
-
-    const saveImagesWithStream = ({ filename, mimetype, stream }) => {
-      const path = `public/images/${filename}`;
-      return new Promise((resolve, reject) =>
-        stream
-          .pipe(createWriteStream(path))
-          .on("finish", () => resolve({ path, filename, mimetype }))
-          .on("error", reject)
-      );
-    };
-
-    const { filename, mimetype, createReadStream } = await image;
-    const stream = createReadStream();
-    let rs = await saveImagesWithStream({ filename, mimetype, stream });
-
-    console.log();
-
+    
+    if (image) {
+      var dataImage = await Image_Save(image);
+    }
+    
+    let urlImage = dataImage && 
+    `http://localhost:${process.env.PORT}/images/${dataImage?.filename}`;
+    
     await new product({ 
       _id, 
       name,
       description,
       quantity,
-      image: rs?.path,
+      image: urlImage,
       price,
       onSale,
       categoryId 
@@ -116,24 +107,31 @@ const Product_Update = async(_, { productInput }) => {
       onSale,
       categoryId 
     } = productInput;
-
+    
+    if (image) {
+      var dataImage = await Image_Save(image);
+    }
+    
+    let urlImage = dataImage && 
+    `http://localhost:${process.env.PORT}/images/${dataImage?.filename}`;
+    
     await product.findByIdAndUpdate(_id, 
       {$set: {
         name,
         description,
         quantity,
-        image,
+        image: urlImage,
         price,
         onSale,
         categoryId 
       }}, { new: true });
-
-    return _id;
+      
+      return _id;
   } catch (error) {
     return error;
   }
 }
-
+  
 const Product_Delete = async(_, { _id }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -149,11 +147,11 @@ const Product_Delete = async(_, { _id }) => {
     return true;
   }
 }
-
+  
 const Product_Count = async(_, {filter = {}}) =>{
   try {
     const query = { isRemove: false };
-
+    
     const { 
       _id,
       name, 
@@ -169,13 +167,27 @@ const Product_Count = async(_, {filter = {}}) =>{
     if(price) query.price = price;
     if(onSale) query.onSale = onSale;
     if(categoryId) query.categoryId = categoryId;
-
+    
     return await product.countDocuments(query);
-
+    
   } catch (error) {
     return error
   }
+  
+}
+  
+const Image_Save = async (image) => {
+  const { filename, mimetype, createReadStream } = await image;
 
+  const path = `public/images/${filename}`;
+  const stream = createReadStream();
+
+  return await new Promise((resolve, reject) =>
+    stream
+      .pipe(createWriteStream(path))
+      .on("finish", () => resolve({ path, filename, mimetype }))
+      .on("error", reject)
+  );
 }
 
 module.exports = {
