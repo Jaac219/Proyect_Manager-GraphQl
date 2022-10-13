@@ -18,9 +18,10 @@ const productSchema = [`
   }
 
   type Mutation {
-    Product_Save(productInput: Product_Input): ID
+    Product_Save(productInput: Product_Input, image: Upload): ID
     Product_Delete(_id: String!): Boolean
     Update_Quantity(_id: String!, value: Int!): Boolean
+    updateAvatar(avatar: Upload): String
   }
 
   input Product_Filter {
@@ -38,7 +39,6 @@ const productSchema = [`
     name: String
     description: String
     quantity: Int
-    image: String
     price: Float
     onSale: Boolean
     categoryId: String

@@ -1,4 +1,5 @@
 const { product, review, mongoose } = require("../models");
+const { GraphQLUpload } = require("graphql-upload");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -45,8 +46,9 @@ const Products_Get = async(_, {filter = {}, option = {}}) =>{
   }
 }
 
-const Product_Save = async(_,  { productInput }) => {
+const Product_Save = async(_,  { productInput, image }) => {
   try {
+    console.log(image)
     return productInput._id 
       ? await Product_Update(_, { productInput }) 
       : await Product_Create(_, { productInput });
@@ -69,16 +71,18 @@ const Product_Create = async(_, { productInput }) => {
       categoryId 
     } = productInput;
 
-    await new product({ 
-      _id, 
-      name,
-      description,
-      quantity,
-      image,
-      price,
-      onSale,
-      categoryId 
-    }).save();
+    console.log(image);
+
+    // await new product({ 
+    //   _id, 
+    //   name,
+    //   description,
+    //   quantity,
+    //   image,
+    //   price,
+    //   onSale,
+    //   categoryId 
+    // }).save();
     
     return _id;
   } catch (error) {
@@ -160,13 +164,19 @@ const Product_Count = async(_, {filter = {}}) =>{
 
 }
 
+const updateAvatar = (_, {avatar}) => {
+  console.log(avatar)
+}
+
 module.exports = {
   Query: {
     Products_Get,
     Product_Count
   },
+  Upload: GraphQLUpload,
   Mutation: {
     Product_Save,
-    Product_Delete
+    Product_Delete,
+    updateAvatar
   }
 }

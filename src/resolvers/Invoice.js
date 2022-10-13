@@ -1,4 +1,4 @@
-const { invoice, product, mongoose } = require("../models");
+const { invoice, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -54,7 +54,6 @@ const Invoice_Save = async (_, { invoiceInput }) => {
 }
 
 const Invoice_Create = async (_, { invoiceInput }) => {
-  
   try {
     const _id = generateId();
     
@@ -72,7 +71,6 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     promises = productsOrder.map(async (order) => {
 
       const { productId, cant, iva } = order;
-
       let find = await product.findById(productId);
       
       let quantity = find.quantity - cant;
