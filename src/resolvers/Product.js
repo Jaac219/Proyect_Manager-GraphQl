@@ -1,5 +1,6 @@
 const { product, review, mongoose } = require("../models");
 const { GraphQLUpload } = require("graphql-upload");
+const { createWriteStream } = require("fs");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -46,9 +47,8 @@ const Products_Get = async(_, {filter = {}, option = {}}) =>{
   }
 }
 
-const Product_Save = async(_,  { productInput, image }) => {
+const Product_Save = async(_,  { productInput }) => {
   try {
-    console.log(image)
     return productInput._id 
       ? await Product_Update(_, { productInput }) 
       : await Product_Create(_, { productInput });
@@ -71,18 +71,32 @@ const Product_Create = async(_, { productInput }) => {
       categoryId 
     } = productInput;
 
-    console.log(image);
+    const saveImagesWithStream = ({ filename, mimetype, stream }) => {
+      const path = `public/images/${filename}`;
+      return new Promise((resolve, reject) =>
+        stream
+          .pipe(createWriteStream(path))
+          .on("finish", () => resolve({ path, filename, mimetype }))
+          .on("error", reject)
+      );
+    };
 
-    // await new product({ 
-    //   _id, 
-    //   name,
-    //   description,
-    //   quantity,
-    //   image,
-    //   price,
-    //   onSale,
-    //   categoryId 
-    // }).save();
+    const { filename, mimetype, createReadStream } = await image;
+    const stream = createReadStream();
+    let rs = await saveImagesWithStream({ filename, mimetype, stream });
+
+    console.log(__filename);
+
+    await new product({ 
+      _id, 
+      name,
+      description,
+      quantity,
+      image: rs?.path,
+      price,
+      onSale,
+      categoryId 
+    }).save();
     
     return _id;
   } catch (error) {
@@ -164,19 +178,14 @@ const Product_Count = async(_, {filter = {}}) =>{
 
 }
 
-const updateAvatar = (_, {avatar}) => {
-  console.log(avatar)
-}
-
 module.exports = {
+  Upload: GraphQLUpload,
   Query: {
     Products_Get,
     Product_Count
   },
-  Upload: GraphQLUpload,
   Mutation: {
     Product_Save,
-    Product_Delete,
-    updateAvatar
+    Product_Delete
   }
 }
