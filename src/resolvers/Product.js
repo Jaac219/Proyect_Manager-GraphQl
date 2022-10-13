@@ -1,7 +1,8 @@
-const { product, review } = require("../models");
+const { product, review, mongoose } = require("../models");
+const { GraphQLUpload } = require("graphql-upload");
+const { createWriteStream } = require("fs");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
-const { default: mongoose } = require("mongoose");
 
 const Products_Get = async(_, {filter = {}, option = {}}) =>{
   try {
@@ -70,12 +71,28 @@ const Product_Create = async(_, { productInput }) => {
       categoryId 
     } = productInput;
 
+    const saveImagesWithStream = ({ filename, mimetype, stream }) => {
+      const path = `public/images/${filename}`;
+      return new Promise((resolve, reject) =>
+        stream
+          .pipe(createWriteStream(path))
+          .on("finish", () => resolve({ path, filename, mimetype }))
+          .on("error", reject)
+      );
+    };
+
+    const { filename, mimetype, createReadStream } = await image;
+    const stream = createReadStream();
+    let rs = await saveImagesWithStream({ filename, mimetype, stream });
+
+    console.log();
+
     await new product({ 
       _id, 
       name,
       description,
       quantity,
-      image,
+      image: rs?.path,
       price,
       onSale,
       categoryId 
@@ -162,6 +179,7 @@ const Product_Count = async(_, {filter = {}}) =>{
 }
 
 module.exports = {
+  Upload: GraphQLUpload,
   Query: {
     Products_Get,
     Product_Count
