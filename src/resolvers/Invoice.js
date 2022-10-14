@@ -182,6 +182,7 @@ const Invoice_Update = async (_, { invoiceInput }) => {
       client
     }}, { new: true })
 
+    return _id;
   } catch (error) {
     return error;
   }

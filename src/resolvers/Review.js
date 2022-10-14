@@ -65,18 +65,7 @@ const Review_Create = async (_, { reviewInput }) => {
       productId
     }).save();
 
-    const ratings = await review.aggregate([
-      {$group : {
-        _id: "$productId",
-        rating: {$avg: "$rating"}
-      }}
-    ]);
-  
-    const promises = ratings.map(async (val)=>{
-      await product.findByIdAndUpdate(val._id, {$set: {rating: val.rating}})
-    });
-  
-    await Promise.all(promises);
+    await Rating_Update();
 
     return _id;
   } catch (error) {
@@ -86,7 +75,6 @@ const Review_Create = async (_, { reviewInput }) => {
 
 const Review_Update = async (_, { reviewInput }) => {
   try {
-
     const {
       _id,
       title,
@@ -103,6 +91,8 @@ const Review_Update = async (_, { reviewInput }) => {
         productId
       }}, {new: true});
 
+      if(rating) await Rating_Update();
+
     return _id;
   } catch (error) {
     return error;
@@ -112,6 +102,7 @@ const Review_Update = async (_, { reviewInput }) => {
 const Review_Delete = async (_, { _id }) => {
   try {
     await review.findByIdAndUpdate(_id, {$set: {isRemove: true}});
+    await Rating_Update();
     return true;
   } catch (error) {
     return error;
@@ -139,6 +130,22 @@ const Review_Count = async (_, { filter = {} }) => {
   };
 
   return await review.countDocuments(query);
+}
+
+const Rating_Update = async() =>{
+  const ratings = await review.aggregate([
+    {$match: {isRemove: false}},
+    {$group : {
+      _id: "$productId",
+      rating: {$avg: "$rating"}
+    }}
+  ]);
+
+  const promises = ratings.map(async (val)=>{
+    await product.findByIdAndUpdate(val._id, {$set: {rating: val.rating}})
+  });
+
+  await Promise.all(promises);
 }
 
 module.exports = {

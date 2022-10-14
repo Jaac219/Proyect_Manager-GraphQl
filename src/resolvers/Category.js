@@ -43,7 +43,8 @@ const Categories_Get = async (_, {filter = {}, option = {}}) => {
   }
 }
 
-const Category_Save = async (_, { categoryInput }) => {
+const Category_Save = async (_, { categoryInput }, { req }) => {
+  console.log(req.verifiedUser);
   try {
     return categoryInput._id
       ? await Category_Update(_, { categoryInput })

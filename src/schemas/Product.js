@@ -6,7 +6,7 @@ const productSchema = [`
     quantity: Int!
     image: String
     price: Float!
-    rating: Int
+    rating: Float
     onSale: Boolean!
     categoryId: String
     reviews: [Review]
@@ -25,7 +25,6 @@ const productSchema = [`
   input Product_Filter {
     _id: String
     name: String
-    description: String
     quantity: Int
     price: Float
     onSale: Boolean

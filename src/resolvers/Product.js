@@ -113,7 +113,7 @@ const Product_Update = async(_, { productInput }) => {
     }
     
     let urlImage = dataImage && 
-    `http://localhost:${process.env.PORT}/images/${dataImage?.filename}`;
+    `http://localhost:${process.env.PORT}/images/${dataImage.filename}`;
     
     await product.findByIdAndUpdate(_id, 
       {$set: {

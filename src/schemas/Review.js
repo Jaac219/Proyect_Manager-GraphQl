@@ -3,7 +3,7 @@ const reviewSchema = [`
     _id: String!
     title: String!
     comment: String!
-    rating: Int
+    rating: Float
     productId: String!
     createdAt: GraphQLDateTime
   }
