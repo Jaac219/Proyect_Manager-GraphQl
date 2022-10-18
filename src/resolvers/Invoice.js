@@ -1,4 +1,4 @@
-const { invoice, product, mongoose } = require("../models");
+const { invoice, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -107,7 +107,7 @@ const Invoice_Create = async (_, { invoiceInput }) => {
   try {
     const _id = generateId();
     
-    /** variables valor e iva total de la factura */
+    /** acumuladores para calcular total factura */
     let invoicePrice = 0, invoiceIva = 0;
     let arrNewQuantity = [];
     
@@ -117,31 +117,32 @@ const Invoice_Create = async (_, { invoiceInput }) => {
       productsOrder
     } = invoiceInput;
     
-    /** Se genera una promesa pending por cada producto actualizar */
-    promises = productsOrder.map(async (order) => {
+    /** Se genera una promesa pending por cada item */
+    let promises = productsOrder.map(async (item) => {
 
-      const { productId, cant, iva } = order;
+      const { productId, cant, iva } = item;
       let find = await product.findById(productId);
       
       let quantity = find.quantity - cant;
-      if(quantity < 0) throw new Error("Producto cantidad menor que 0");
+      if(quantity < 0)
+        throw new Error("Producto cantidad menor que 0");
 
       arrNewQuantity.push({_id: productId, quantity});
       
       /** Calculos datos de la factura y sus items */
-      order.productName = find.name;
-      order.unitPrice = find.price;
-      order.subtotal = cant * find.price;
-      order.iva = order.subtotal * (iva/100);
-      order.totalValue = order.iva + order.subtotal;
+      item.productName = find.name;
+      item.unitPrice = find.price;
+      item.subtotal = cant * find.price;
+      item.iva = item.subtotal * (iva/100);
+      item.totalValue = item.iva + item.subtotal;
       
-      invoiceIva += order.iva;
-      invoicePrice += order.subtotal;
+      invoiceIva += item.iva;
+      invoicePrice += item.subtotal;
       
-      return order;
+      return item;
     });
     
-    /** Resolución de las promesas */
+    
     await Promise.all(promises);
     
     /** Actualización stock de cada producto */
@@ -190,11 +191,17 @@ const Invoice_Update = async (_, { invoiceInput }) => {
 
 const Invoice_Cancel = async (_, { _id }) => {
   try {
-    let find = await invoice.findOneAndUpdate({_id, state: {$ne: "CANCEL"}}, {$set: {state: "CANCEL"}});
+    let find = await invoice.findOneAndUpdate({
+      _id, 
+      state: {$ne: "CANCEL"}
+    }, {$set: {state: "CANCEL"}});
 
     find?.productsOrder.forEach(async (value)=>{
       const { productId, cant } = value;
-      await product.findByIdAndUpdate(productId, {$inc: {quantity: cant}})
+      await product.findByIdAndUpdate(
+        productId, 
+        {$inc: {quantity: cant}}
+      )
     })
 
     return find ? true : false; 

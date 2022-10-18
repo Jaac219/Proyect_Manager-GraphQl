@@ -47,7 +47,9 @@ const Products_Get = async(_, {filter = {}, option = {}}) =>{
   }
 }
 
-const Product_Save = async(_,  { productInput }) => {
+const Product_Save = async(_,  { productInput }, { req }) => {
+  // if(req.verifiedUser?.role !== "ADMIN")
+  //   throw new Error("Not authorized");
   try {
     return productInput._id 
       ? await Product_Update(_, { productInput }) 
@@ -71,12 +73,12 @@ const Product_Create = async(_, { productInput }) => {
       categoryId 
     } = productInput;
     
-    if (image) {
-      var dataImage = await Image_Save(image);
-    }
+    let dataImage = image 
+      ? await Image_Save(image)
+      : null
     
     let urlImage = dataImage && 
-    `http://localhost:${process.env.PORT}/images/${dataImage?.filename}`;
+    `http://localhost:${process.env.PORT}/images/${dataImage.filename}`;
     
     await new product({ 
       _id, 
@@ -108,9 +110,9 @@ const Product_Update = async(_, { productInput }) => {
       categoryId 
     } = productInput;
     
-    if (image) {
-      var dataImage = await Image_Save(image);
-    }
+    let dataImage = image 
+      ? await Image_Save(image)
+      : null
     
     let urlImage = dataImage && 
     `http://localhost:${process.env.PORT}/images/${dataImage.filename}`;
@@ -133,6 +135,8 @@ const Product_Update = async(_, { productInput }) => {
 }
   
 const Product_Delete = async(_, { _id }) => {
+  // if(req.verifiedUser?.role !== "ADMIN")
+  //   throw new Error("Not authorized");
   const session = await mongoose.startSession();
   session.startTransaction();
   try { 

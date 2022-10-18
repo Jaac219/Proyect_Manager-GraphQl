@@ -18,30 +18,35 @@ const resolvers = require("./src/merge/mergeResolvers.js");
 app.use(express.static('public'));
 app.use(graphqlUploadExpress());
 
-// app.use(async (req, res, next)=>{
-//   let token = req.headers.authorization?.split(' ')[1] || "";
-//   if(token){
-//     req.verifiedUser = jwt.verify(token, JWT_SECRET);
-//   }
-//   next();
-// })
+// Apply authentication middleware
+app.use(async (req, res, next)=>{
+  let token = req.headers.authorization.split(' ')[1] || "";
+  if(token){
+    try {
+      req.verifiedUser = jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  next();
+});
 
 app.get('/', (req, res) =>{
   res.send('welcome');
-})
+});
 
 async function start() {
-  const schema = makeExecutableSchema({typeDefs, resolvers})
+  const schema = makeExecutableSchema({typeDefs, resolvers});
   const apolloServer = new ApolloServer({ 
-    context: ctx=>ctx,
-    schema
+    schema,
+    context: ctx=>ctx
   });
   await apolloServer.start();
 
-  apolloServer.applyMiddleware({app})
+  apolloServer.applyMiddleware({app});
   app.listen(PORT, (req, res)=>{
     console.log(`Servidor iniciado en el puerto ${PORT} 🚀`);
-  })
+  });
 }
 
 start();

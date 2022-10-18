@@ -43,8 +43,9 @@ const Categories_Get = async (_, {filter = {}, option = {}}) => {
   }
 }
 
-const Category_Save = async (_, { categoryInput }, { req }) => {
-  console.log(req.verifiedUser);
+const Category_Save = async (_, { categoryInput }) => {
+  // if(req.verifiedUser?.role !== "ADMIN")
+  //   throw new Error("Not authorized");
   try {
     return categoryInput._id
       ? await Category_Update(_, { categoryInput })
@@ -83,6 +84,8 @@ const Category_Update = async (_, { categoryInput }) => {
 }
 
 const Category_Delete = async (_, { _id }) => {
+  // if(req.verifiedUser?.role !== "ADMIN")
+  //   throw new Error("Not authorized");
   try {
     await category.findByIdAndUpdate(_id, { $set: { isRemove: true } });
     return true;
