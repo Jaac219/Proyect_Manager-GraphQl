@@ -1,4 +1,4 @@
-const { invoice, product } = require("../models");
+const { invoice: InvoiceModel, product: ProductModel } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 
@@ -108,57 +108,60 @@ const Invoice_Create = async (_, { invoiceInput }) => {
     const _id = generateId();
     
     /** acumuladores para calcular total factura */
-    let invoicePrice = 0, invoiceIva = 0;
     let arrNewQuantity = [];
     
     let {
       number,
       client,
-      productsOrder
+      productsOrder ,// [{productId, qty}]
+      ivaPercentage = 16,
+      subtotal = 0,
+      total = 0,
+      totalIva = 0
     } = invoiceInput;
     
     /** Se genera una promesa pending por cada item */
-    let promises = productsOrder.map(async (item) => {
-
-      const { productId, cant, iva } = item;
-      let find = await product.findById(productId);
-      
-      let quantity = find.quantity - cant;
-      if(quantity < 0)
-        throw new Error("Producto cantidad menor que 0");
-
-      arrNewQuantity.push({_id: productId, quantity});
-      
-      /** Calculos datos de la factura y sus items */
-      item.productName = find.name;
-      item.unitPrice = find.price;
-      item.subtotal = cant * find.price;
-      item.iva = item.subtotal * (iva/100);
-      item.totalValue = item.iva + item.subtotal;
-      
-      invoiceIva += item.iva;
-      invoicePrice += item.subtotal;
-      
-      return item;
-    });
+      await Promise.all(productsOrder.map((item) => new Promise(async (resolve, reject) => {
+        try {
+          const { productId, cant } = item;
+          let product = await ProductModel.findById(productId);
+          
+          let quantity = product.quantity - cant;
+          if(quantity <= 0)
+            throw new Error("Producto cantidad menor que 0");
     
-    
-    await Promise.all(promises);
+          arrNewQuantity.push({_id: productId, quantity});
+          
+          /** Calculos datos de la factura y sus items */
+          item.price = product.price;
+          item.subtotal = cant * product.price;
+          
+          subtotal += item.subtotal;
+          
+          resolve(item)
+        } catch (e) {
+          reject(e)
+        }
+      })));
+
+      totalIva = subtotal * (ivaPercentage/100)
+      total = subtotal + totalIva;
     
     /** Actualización stock de cada producto */
     arrNewQuantity.forEach(async (vl)=>{
       const { _id, quantity } = vl;
-      await product.findByIdAndUpdate(_id, {$set: {quantity}});
+      await ProductModel.findByIdAndUpdate(_id, {$set: {quantity}});
     });
 
-    await new invoice({ 
+    await new InvoiceModel({ 
       _id,
       number,
       client,
-      invoicePrice,
-      invoiceIva,
       productsOrder,
-      totalPrice: invoiceIva+invoicePrice,
+      ivaPercentage,
+      totalIva,
+      subtotal,
+      total
     }).save();
     
     return _id;

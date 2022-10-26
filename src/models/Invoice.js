@@ -29,7 +29,11 @@ const schema = new Schema({
     type: String,
     enum : ['PAY','CANCEL'],
     default: "PAY"
-  }
+  },
+  ivaPercentage: Number,
+  totalIva: Number,
+  subtotal: Number,
+  total: Number
 },{
   collection: collectionName,
   timestamps: true,

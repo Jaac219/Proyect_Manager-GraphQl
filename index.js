@@ -3,33 +3,35 @@ require("./src/db.js");
 
 const { makeExecutableSchema } = require("@graphql-tools/schema");
 const { graphqlUploadExpress } = require("graphql-upload");
+const { applyMiddleware } = require("graphql-middleware");
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+
+const permissions = require("./src/permissions");
 const jwt = require("jsonwebtoken");
 
-const { ApolloServer } = require("apollo-server-express");
-const express = require("express");
+const typeDefs = require("./src/merge/mergeSchemas.js");
+const resolvers = require("./src/merge/mergeResolvers.js");
 
 const PORT = process.env.PORT;
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
 
-const typeDefs = require("./src/merge/mergeSchemas.js");
-const resolvers = require("./src/merge/mergeResolvers.js");
-
 app.use(express.static('public'));
 app.use(graphqlUploadExpress());
 
 // Apply authentication middleware
-app.use(async (req, res, next)=>{
-  let token = req.headers.authorization.split(' ')[1] || "";
-  if(token){
-    try {
-      req.verifiedUser = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  next();
-});
+// app.use(async (req, res, next)=>{
+//   let token = req.headers.authorization.split(' ')[1] || "";
+//   if(token){
+//     try {
+//       req.verifiedUser = jwt.verify(token, JWT_SECRET);
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   }
+//   next();
+// });
 
 app.get('/', (req, res) =>{
   res.send('welcome');
@@ -37,6 +39,8 @@ app.get('/', (req, res) =>{
 
 async function start() {
   const schema = makeExecutableSchema({typeDefs, resolvers});
+  // const schemaWithPermissions = applyMiddleware(schema, permissions);
+  
   const apolloServer = new ApolloServer({ 
     schema,
     context: ctx=>ctx
