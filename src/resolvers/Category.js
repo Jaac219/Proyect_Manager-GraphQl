@@ -1,6 +1,9 @@
 const { category } = require("../models");
+const { PubSub } = require('graphql-subscriptions')
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
+
+const pubsub = new PubSub()
 
 const Categories_Get = async (_, {filter = {}, option = {}}) => {
   try {
@@ -13,6 +16,7 @@ const Categories_Get = async (_, {filter = {}, option = {}}) => {
     if(name) query.name = { $regex: name, $options: 'i' }
 
     const find = category.aggregate([
+
       { $match: query },
       {
         $lookup: {
@@ -61,8 +65,9 @@ const Category_Create = async (_, { categoryInput }) => {
     const _id = generateId();
 
     await category({ _id, name }).save();
+    pubsub.publish('CATEGORY_ADD', { Category_Save: {_id, name} })
+    
     return _id;
-
   } catch (error) {
     return error;
   }
@@ -117,5 +122,12 @@ module.exports = {
   Mutation: {
     Category_Save,
     Category_Delete
+  },
+  Subscription: {
+    Category_Save: {
+      subscribe: async ()=>{
+        return pubsub.asyncIterator('CATEGORY_ADD')
+      }
+    }
   }
 }

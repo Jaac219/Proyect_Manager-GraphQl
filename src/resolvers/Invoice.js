@@ -127,7 +127,7 @@ const Invoice_Create = async (_, { invoiceInput }) => {
           let product = await ProductModel.findById(productId);
           
           let quantity = product.quantity - cant;
-          if(quantity <= 0)
+          if(quantity < 0)
             throw new Error("Producto cantidad menor que 0");
     
           arrNewQuantity.push({_id: productId, quantity});

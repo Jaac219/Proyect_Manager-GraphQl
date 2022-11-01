@@ -15,6 +15,10 @@ const categorySchema = [`
     Category_Delete(_id: String!): Boolean
   }
 
+  type Subscription {
+    Category_Save: Category
+  }
+
   input Category_Filter {
     _id: String
     name: String
