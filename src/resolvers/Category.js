@@ -25,6 +25,7 @@ const Categories_Get = async (_, {filter = {}, option = {}}) => {
           foreignField: "categoryId",
           as: "products",
           pipeline: [
+            {$match: {isRemove: false}},
             {
               $lookup: {
                 from: "review",
