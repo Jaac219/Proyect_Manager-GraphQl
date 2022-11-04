@@ -1,4 +1,4 @@
-const { invoice: InvoiceModel, product: ProductModel } = require("../models");
+const { invoice, product } = require("../models");
 
 const { generateId, handlePagination } = require("@codecraftkit/utils");
 

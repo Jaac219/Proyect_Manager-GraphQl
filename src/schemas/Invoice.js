@@ -1,7 +1,7 @@
 const invoiceSchema = [`
   type Invoice {
     _id: String!
-    number: Int!
+    number: Int
     client: String
     invoicePrice: Float
     invoiceIva: Float
