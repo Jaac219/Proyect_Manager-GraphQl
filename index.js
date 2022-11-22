@@ -10,7 +10,7 @@ const { graphqlUploadExpress } = require("graphql-upload");
 // const { applyMiddleware } = require("graphql-middleware");
 
 const { useServer } = require('graphql-ws/lib/use/ws')
-// const permissions = require("./src/permissions");
+// const permissions = require("./src/middlewares/permissions");
 // const jwt = require("jsonwebtoken");
 
 const typeDefs = require("./src/merge/mergeSchemas.js");
@@ -95,4 +95,6 @@ async function start() {
   });
 }
 
+
+/// comentario para probar un commit
 start();
